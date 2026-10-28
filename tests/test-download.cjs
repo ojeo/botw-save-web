@@ -9,6 +9,8 @@ let blob;
 function MarcFile() {}
 const globals = {
   MarcFile,
+  window: {},
+  navigator: {userAgent:"Mozilla/5.0 Chrome/156 Safari/537.36",platform:"Win32",maxTouchPoints:0},
   Blob,
   Uint8Array,
   URL: {
