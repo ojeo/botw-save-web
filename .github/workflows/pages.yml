@@ -30,6 +30,8 @@ jobs:
           test -s web-dist/js/web-download.js
           test -s web-dist/js/zelda-botw.js
           test -z "$(find web-dist -name '*.sav' -print -quit)"
+      - name: Test original save filenames and binary output
+        run: node tests/test-download.cjs
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
