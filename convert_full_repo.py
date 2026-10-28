@@ -37,28 +37,11 @@ body{padding-top:0!important}
   border-radius:10px;background:#ecf4ff;color:#23415c}
 @media(max-width:700px){#header-top h1{font-size:20px}}
 </style></head>""", 1)
-html = html.replace("<body>", '<body><div class="web-notice">纯 Web 编辑器：本地读取存档，不上传服务器。修改前请用 JKSV 备份；点击保存后下载新文件，再手动放回原槽位。</div>', 1)
+html = html.replace("<body>", '<body><div class="web-notice">纯 Web 编辑器：本地读取存档，不上传服务器。修改前请用 JKSV 备份；Chrome/Edge 点击保存将弹出另存为；Safari 可能打开分享菜单，请选择存储到文件。请确保保存文件名与原文件一致，再放回原槽位。</div>', 1)
 htmlfile.write_text(html, encoding="utf-8")
-(dst / "js" / "web-download.js").write_text("""
-(function(){
-  'use strict';
-  MarcFile.prototype.save=function(){
-    if(!(this._u8array instanceof Uint8Array)||!this._u8array.length)
-      throw new Error('未加载有效存档');
-    var blob=new Blob([this._u8array],{type:'application/octet-stream'});
-    var url=URL.createObjectURL(blob);
-    var link=document.createElement('a');
-    link.href=url;
-    // Keep the exact uploaded filename, including extension and Unicode characters.
-    // Strip only path separators; never force all downloads to game_data.sav.
-    var originalName=(typeof this.fileName==='string'?this.fileName:'');
-    originalName=originalName.split(String.fromCharCode(92)).pop().split('/').pop();
-    link.download=originalName||'game_data.sav';
-    document.body.appendChild(link);link.click();link.remove();
-    setTimeout(function(){URL.revokeObjectURL(url)},60000);
-  };
-})();
-""", encoding="utf-8")
+# The download adapter is maintained as a standalone, independently tested JS file.
+shutil.copy2(pathlib.Path(__file__).resolve().parent / "web" / "web-download.js",
+             dst / "js" / "web-download.js")
 (dst / "js" / "web-bridge.js").write_text("""
 (function(){
  'use strict';
@@ -69,8 +52,22 @@ htmlfile.write_text(html, encoding="utf-8")
    el.value=String(value);el.dispatchEvent(new Event('change',{bubbles:true}))}}
  window.saveChanges=function(){
    if(!loaded())return alert('请先载入 game_data.sav');
-   try{SavegameEditor.save();tempFile.save();mark('已生成下载文件')}
-   catch(err){alert('保存失败：'+err.message)}
+   try{
+     SavegameEditor.save();
+     Promise.resolve(tempFile.save()).then(function(result){
+       var filename=(result&&result.filename)||tempFile.fileName||'game_data.sav';
+       if(result&&result.method==='cancelled')mark('已取消保存');
+       else if(result&&result.method==='picker')mark('已保存：'+filename);
+       else if(result&&result.method==='share')mark('分享操作结束：请确认已在系统中存储 '+filename);
+       else mark('已开始下载：'+filename);
+     }).catch(function(error){
+       alert('保存失败：'+(error&&error.message||error));
+       mark('保存失败');
+     });
+   }catch(error){
+     alert('保存失败：'+(error&&error.message||error));
+     mark('保存失败');
+   }
  };
  window.addEventListener('load',function(){
    var b=byId('bulk-max-stats');if(b)b.addEventListener('click',function(){
