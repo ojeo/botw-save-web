@@ -1,0 +1,39 @@
+name: Publish BOTW Web Editor
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: https://ojeo.github.io/botw-save-web/
+    steps:
+      - name: Checkout converter
+        uses: actions/checkout@v4
+      - name: Download original editor
+        run: git clone --depth 1 https://github.com/Xunzi229/Botw-Savediter.git upstream
+      - name: Convert to static website
+        run: python3 convert_full_repo.py upstream web-dist
+      - name: Validate deployment
+        run: |
+          test -s web-dist/index.html
+          test -s web-dist/js/web-bridge.js
+          test -s web-dist/js/web-download.js
+          test -s web-dist/js/zelda-botw.js
+          test -z "$(find web-dist -name '*.sav' -print -quit)"
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: web-dist
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
