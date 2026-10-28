@@ -51,7 +51,8 @@ htmlfile.write_text(html, encoding="utf-8")
     link.href=url;
     // Keep the exact uploaded filename, including extension and Unicode characters.
     // Strip only path separators; never force all downloads to game_data.sav.
-    var originalName=(typeof this.fileName==='string'?this.fileName:'').split(/[\\/]/).pop();
+    var originalName=(typeof this.fileName==='string'?this.fileName:'');
+    originalName=originalName.split(String.fromCharCode(92)).pop().split('/').pop();
     link.download=originalName||'game_data.sav';
     document.body.appendChild(link);link.click();link.remove();
     setTimeout(function(){URL.revokeObjectURL(url)},60000);
