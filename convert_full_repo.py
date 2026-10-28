@@ -48,7 +48,11 @@ htmlfile.write_text(html, encoding="utf-8")
     var blob=new Blob([this._u8array],{type:'application/octet-stream'});
     var url=URL.createObjectURL(blob);
     var link=document.createElement('a');
-    link.href=url;link.download='game_data.sav';
+    link.href=url;
+    // Keep the exact uploaded filename, including extension and Unicode characters.
+    // Strip only path separators; never force all downloads to game_data.sav.
+    var originalName=(typeof this.fileName==='string'?this.fileName:'').split(/[\\/]/).pop();
+    link.download=originalName||'game_data.sav';
     document.body.appendChild(link);link.click();link.remove();
     setTimeout(function(){URL.revokeObjectURL(url)},60000);
   };
