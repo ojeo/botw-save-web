@@ -1,4 +1,4 @@
-name: Publish BOTW Web Editor
+name: Publish Zelda BOTW and TOTK Web Editors
 on:
   push:
     branches: [main]
@@ -21,19 +21,31 @@ jobs:
         uses: actions/checkout@v4
       - name: Download original editor
         run: git clone --depth 1 https://github.com/Xunzi229/Botw-Savediter.git upstream
+      - name: Download TOTK editor and pinned fflate dependency
+        run: |
+          git clone --depth 1 https://github.com/marcrobledo/savegame-editors.git upstream_totk
+          curl -fLsS --retry 3 https://unpkg.com/fflate@0.8.0/umd/index.js -o upstream_totk/zelda-totk/lib/fflate.min.js
+          curl -fLsS --retry 3 https://unpkg.com/fflate@0.8.0/LICENSE -o upstream_totk/zelda-totk/lib/FFLATE-LICENSE
       - name: Convert to static website
-        run: python3 convert_full_repo.py upstream web-dist
+        run: python3 convert_full_repo.py upstream web-dist upstream_totk
       - name: Validate deployment
         run: |
           test -s web-dist/index.html
           test -s web-dist/js/web-bridge.js
           test -s web-dist/js/web-download.js
           test -s web-dist/js/zelda-botw.js
+          test -s web-dist/totk/index.html
+          test -s web-dist/totk/zelda-totk.js
+          test -s web-dist/totk/locale/zelda-totk.locale.zh.js
+          test -s web-dist/totk/lib/fflate.min.js
+          test -s web-dist/totk/LICENSE
+          test -s web-dist/savegame-editor.js
           test -z "$(find web-dist -name '*.sav' -print -quit)"
       - name: Test original save filenames and binary output
         run: |
           node tests/test-download.cjs
           node tests/test-platform-save.cjs
+          node tests/test-totk-build.cjs
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
