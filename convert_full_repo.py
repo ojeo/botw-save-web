@@ -154,6 +154,8 @@ shutil.copy2(pathlib.Path(__file__).resolve().parent / "web" / "web-download.js"
              totk_target / "web-download.js")
 shutil.copy2(pathlib.Path(__file__).resolve().parent / "web" / "totk-bridge.js",
              totk_target / "web-totk.js")
+shutil.copy2(pathlib.Path(__file__).resolve().parent / "web" / "totk-bulk.js",
+             totk_target / "web-totk-bulk.js")
 for save_file in totk_target.rglob("*.sav"):
     save_file.unlink()  # Do not publish example progress.sav, caption.sav, or user saves.
 totk_index = totk_target / "index.html"
@@ -170,6 +172,7 @@ totk_html = totk_html.replace(fflate_cdn,
     '<script src="./lib/fflate.min.js"></script>', 1)
 totk_html = totk_html.replace("</head>",
     '<script src="./web-totk.js"></script>\n'
+    '<script src="./web-totk-bulk.js"></script>\n'
     '<style>.game-selector{display:flex;justify-content:center;gap:10px;'
     'background:#152943;padding:12px;flex-wrap:wrap}'
     '.game-selector a{color:#fff;text-decoration:none;padding:9px 18px;'
