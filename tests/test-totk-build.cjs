@@ -9,7 +9,7 @@ assert.match(botw,/totk\//,'BOTW must link to TOTK');
 assert.match(totk,/\.\.\/.*旷野之息/,'TOTK must link back to BOTW');
 assert.match(totk,/web-totk\.js/);
 assert.match(totk,/web-download\.js/);
-assert.match(totk,/locale\/zelda-totk/,'TOTK language selector expected');
+assert.match(totk,/zelda-totk\.locale\.js/,'TOTK language loader expected');
 assert.ok(fs.existsSync(path.join(output,'savegame-editor.js')));
 assert.ok(fs.existsSync(path.join(output,'totk','locale','zelda-totk.locale.zh.js')));
 assert.ok(fs.existsSync(path.join(output,'totk','zelda-totk.hashes.csv')));
