@@ -4,10 +4,14 @@ import pathlib
 import shutil
 import sys
 
-if len(sys.argv) != 3:
-    raise SystemExit("Usage: python3 convert_full_repo.py UPSTREAM OUTPUT")
+if len(sys.argv) != 4:
+    raise SystemExit("Usage: python3 convert_full_repo.py BOTW_UPSTREAM OUTPUT TOTK_UPSTREAM")
 src = pathlib.Path(sys.argv[1]).resolve()
 dst = pathlib.Path(sys.argv[2]).resolve()
+totk_src = pathlib.Path(sys.argv[3]).resolve()
+totk_app = totk_src / "zelda-totk"
+if not (totk_app / "index.html").is_file() or not (totk_src / "savegame-editor.js").is_file():
+    raise SystemExit("Missing upstream TOTK editor or shared JS library")
 app = src / "zelda-botw"
 if not (app / "index.html").is_file() or not (app / "js" / "savegame-editor.js").is_file():
     raise SystemExit("Missing upstream editor files")
@@ -38,6 +42,18 @@ body{padding-top:0!important}
 @media(max-width:700px){#header-top h1{font-size:20px}}
 </style></head>""", 1)
 html = html.replace("<body>", '<body><div class="web-notice">纯 Web 编辑器：本地读取存档，不上传服务器。修改前请用 JKSV 备份；Chrome/Edge 点击保存将弹出另存为；Safari 可能打开分享菜单，请选择存储到文件。请确保保存文件名与原文件一致，再放回原槽位。</div>', 1)
+# Preserve the existing BOTW URL and UI, add a clear game selector.
+html = html.replace("</head>", """<style>
+.game-selector{display:flex;justify-content:center;gap:10px;padding:12px;background:#122944;flex-wrap:wrap}
+.game-selector a{color:#fff;text-decoration:none;padding:9px 18px;border:1px solid #7291b7;border-radius:7px}
+.game-selector a[aria-current]{background:#eff5ff;color:#183b5c;font-weight:bold}
+</style></head>""", 1)
+html = html.replace('<body>', '''<body>
+<nav class="game-selector" aria-label="游戏切换">
+<a href="./" aria-current="page">旷野之息 · BOTW</a>
+<a href="./totk/">王国之泪 · TOTK</a>
+</nav>
+''', 1)
 htmlfile.write_text(html, encoding="utf-8")
 # The download adapter is maintained as a standalone, independently tested JS file.
 shutil.copy2(pathlib.Path(__file__).resolve().parent / "web" / "web-download.js",
@@ -127,4 +143,57 @@ if (src / "LICENSE").is_file():
     "Edit game_data.sav locally. No server upload. "
     "Desktop folder management is not available. Keep an original JKSV backup.\n",
     encoding="utf-8")
+
+# Add the official Tears of the Kingdom editor under /totk/.
+totk_target = dst / "totk"
+shutil.copytree(totk_app, totk_target)
+# Use Marc Robledo's unmodified editor library, but replace its legacy save behavior.
+shutil.copy2(totk_src / "savegame-editor.js", dst / "savegame-editor.js")
+shutil.copy2(totk_src / "LICENSE", totk_target / "LICENSE")
+shutil.copy2(pathlib.Path(__file__).resolve().parent / "web" / "web-download.js",
+             totk_target / "web-download.js")
+shutil.copy2(pathlib.Path(__file__).resolve().parent / "web" / "totk-bridge.js",
+             totk_target / "web-totk.js")
+for save_file in totk_target.rglob("*.sav"):
+    save_file.unlink()  # Do not publish example progress.sav, caption.sav, or user saves.
+totk_index = totk_target / "index.html"
+totk_html = totk_index.read_text(encoding="utf-8")
+shared_script = '<script type="text/javascript" src="../savegame-editor.js?version=1"></script>'
+if shared_script not in totk_html:
+    raise SystemExit("TOTK upstream shared script has changed")
+totk_html = totk_html.replace(shared_script,
+    shared_script + '\n\t<script src="./web-download.js"></script>', 1)
+fflate_cdn = '<script src="https://unpkg.com/fflate@0.8.0"></script>'
+if fflate_cdn not in totk_html:
+    raise SystemExit("TOTK upstream fflate dependency changed")
+totk_html = totk_html.replace(fflate_cdn,
+    '<script src="./lib/fflate.min.js"></script>', 1)
+totk_html = totk_html.replace("</head>",
+    '<script src="./web-totk.js"></script>\n'
+    '<style>.game-selector{display:flex;justify-content:center;gap:10px;'
+    'background:#152943;padding:12px;flex-wrap:wrap}'
+    '.game-selector a{color:#fff;text-decoration:none;padding:9px 18px;'
+    'border:1px solid #7891ae;border-radius:7px}'
+    '.game-selector a[aria-current]{background:#eaf1ff;color:#243f60;font-weight:bold}'
+    '.web-warning{padding:12px 20px;background:#fff5db;color:#3d392e;text-align:center}'
+    '</style></head>', 1)
+totk_html = totk_html.replace("<body>", '''<body>
+<nav class="game-selector" aria-label="游戏切换">
+<a href="../">旷野之息 · BOTW</a>
+<a href="./" aria-current="page">王国之泪 · TOTK</a>
+</nav>
+<div class="web-warning">王国之泪：选择 JKSV 导出的 slot_0x/progress.sav（或载入备份目录）。
+存档只在浏览器中处理；请保留原件。Chrome/Edge 支持另存为，
+Safari 支持分享菜单“存储到文件”。</div>
+''', 1)
+# Chinese by default for new users; stored preferences are still honored.
+totk_js_file = totk_target / "zelda-totk.js"
+totk_js = totk_js_file.read_text(encoding="utf-8")
+default_lang = "lang:'en'"
+if default_lang not in totk_js:
+    raise SystemExit("TOTK default language setting changed")
+totk_js_file.write_text(totk_js.replace(default_lang, "lang:'zh'", 1), encoding="utf-8")
+totk_index.write_text(totk_html, encoding="utf-8")
+print("TOTK static editor prepared:", totk_target)
+
 print("Generated:", dst)
