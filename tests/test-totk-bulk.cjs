@@ -28,7 +28,7 @@ function el(tag){
  return {
   tagName:tag,children:[],events:{},style:{},textContent:'',value:'',disabled:false,
   appendChild(c){this.children.push(c);c.parentNode=this},
-  addEventListener(type,cb){this.events[type]=cb},
+  addEventListener(type,cb){const old=this.events[type];this.events[type]=old?function(...args){old(...args);cb(...args)}:cb},
   setAttribute(k,v){this[k]=v},
   querySelector(q){return q==='input'?this.children.find(x=>x.tagName==='input'):null}
  };
