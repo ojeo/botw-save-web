@@ -8,7 +8,7 @@
   }
 
   function apply(category) {
-    var result={category:category,percent:BulkPercent.get(),changed:0,skipped:0,
+    var result={category:category,percent:window.BulkPercent.get(),changed:0,skipped:0,
       supported:CATEGORIES.indexOf(category)!==-1};
     if(!result.supported)return result;
     var panel=document.getElementById('container-'+category);
@@ -18,7 +18,7 @@
       var max=el.maxValue;
       // Respect maxValue supplied by upstream's _getItemMaximumQuantity().
       // Never guess the cap from the category or modify select-only dye values.
-      var value=BulkPercent.target(max);
+      var value=window.BulkPercent.target(max);
       if(value===null||!Number.isFinite(Number(el.value))){result.skipped++;return;}
       if(Number(el.value)!==value){
         el.value=String(value);
@@ -30,7 +30,7 @@
   }
 
   function updateLabel(button){
-    button.textContent='当前分类数量/耐久最大化（'+BulkPercent.get()+'%）';
+    button.textContent='当前分类数量/耐久最大化（'+window.BulkPercent.get()+'%）';
     button.disabled=CATEGORIES.indexOf(currentCategory())===-1;
   }
 
@@ -38,7 +38,7 @@
     var button=document.getElementById('bulk-fill-items');
     if(!button)return;
     var container=button.parentNode;
-    var setting=BulkPercent.createControl('botw-bulk-percent');
+    var setting=window.BulkPercent.createControl('botw-bulk-percent');
     var input=setting.querySelector('input');
     input.addEventListener('change',function(){updateLabel(button)});
     container.insertBefore(setting,button);
@@ -50,7 +50,7 @@
       if(CATEGORIES.indexOf(category)===-1){
         alert('当前分类不能批量修改数量或耐久');return;
       }
-      var percent=BulkPercent.get();
+      var percent=window.BulkPercent.get();
       if(percent<100&&!window.confirm('将当前分类设置为最大值的 '+percent+
         '%，可能降低已有数值。确定继续？'))return;
       var result=apply(category);
