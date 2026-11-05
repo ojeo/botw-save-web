@@ -154,6 +154,11 @@ shutil.copy2(pathlib.Path(__file__).resolve().parent / "web" / "totk-bulk.js",
              totk_target / "web-totk-bulk.js")
 shutil.copy2(pathlib.Path(__file__).resolve().parent / "web" / "bulk-percent.js",
              totk_target / "web-bulk-percent.js")
+# Responsive TOTK UI is a separate layer; upstream game logic stays intact.
+shutil.copy2(pathlib.Path(__file__).resolve().parent / "web" / "totk-mobile.css",
+             totk_target / "web-mobile.css")
+shutil.copy2(pathlib.Path(__file__).resolve().parent / "web" / "totk-mobile.js",
+             totk_target / "web-mobile.js")
 for save_file in totk_target.rglob("*.sav"):
     save_file.unlink()  # Do not publish example progress.sav, caption.sav, or user saves.
 totk_index = totk_target / "index.html"
@@ -179,14 +184,23 @@ totk_html = totk_html.replace("</head>",
     '.game-selector a[aria-current]{background:#eaf1ff;color:#243f60;font-weight:bold}'
     '.web-warning{padding:12px 20px;background:#fff5db;color:#3d392e;text-align:center}'
     '</style></head>', 1)
+# Load mobile CSS last so it can override upstream desktop-only dimensions.
+# Keep JS enhancements separate from save/load implementation.
+totk_html = totk_html.replace("</head>",
+    '<link rel="stylesheet" href="./web-mobile.css?v=2">\n'
+    '<script defer src="./web-mobile.js?v=2"></script>\n'
+    '</head>', 1)
 totk_html = totk_html.replace("<body>", '''<body>
 <nav class="game-selector" aria-label="游戏切换">
 <a href="../">旷野之息 · BOTW</a>
 <a href="./" aria-current="page">王国之泪 · TOTK</a>
 </nav>
-<div class="web-warning">王国之泪：选择 JKSV 导出的 slot_0x/progress.sav（或载入备份目录）。
-存档只在浏览器中处理；请保留原件。Chrome/Edge 支持另存为，
-Safari 支持分享菜单“存储到文件”。</div>
+<details class="web-warning">
+  <summary>本地编辑存档 · 使用说明</summary>
+  <div class="notice-copy">选择 JKSV 导出的 slot_0x/progress.sav（或载入备份目录）。
+  存档只在浏览器中处理；请保留原件。Chrome/Edge 使用另存为，
+  iPhone Safari 使用分享菜单中的“存储到文件”。</div>
+</details>
 ''', 1)
 # Chinese by default for new users; stored preferences are still honored.
 totk_js_file = totk_target / "zelda-totk.js"
