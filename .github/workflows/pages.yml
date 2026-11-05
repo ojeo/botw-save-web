@@ -34,9 +34,12 @@ jobs:
           test -s web-dist/js/web-bridge.js
           test -s web-dist/js/web-download.js
           test -s web-dist/js/zelda-botw.js
+          test -s web-dist/js/bulk-percent.js
+          test -s web-dist/js/web-bulk.js
           test -s web-dist/totk/index.html
           test -s web-dist/totk/zelda-totk.js
           test -s web-dist/totk/web-totk-bulk.js
+          test -s web-dist/totk/web-bulk-percent.js
           test -s web-dist/totk/locale/zelda-totk.locale.zh.js
           test -s web-dist/totk/lib/fflate.min.js
           test -s web-dist/totk/LICENSE
@@ -48,6 +51,7 @@ jobs:
           node tests/test-platform-save.cjs
           node tests/test-totk-build.cjs
           node tests/test-totk-bulk.cjs
+          node tests/test-botw-bulk-percent.cjs
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
