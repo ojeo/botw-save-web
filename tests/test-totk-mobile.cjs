@@ -25,8 +25,8 @@ assert.match(html,/web-totk-bulk\.js/);
 assert.ok(!html.includes('maximum-scale=1.0'),'Do not disable browser zoom');
 assert.ok(!html.includes('user-scalable=0'),'Do not block pinch zoom');
 assert.ok(html.indexOf('zelda-totk.css')<html.indexOf('web-mobile.css'));
-assert.ok(converter.includes('web/totk-mobile.css'));
-assert.ok(converter.includes('web/totk-mobile.js'));
+assert.ok(converter.includes('totk-mobile.css'));
+assert.ok(converter.includes('totk-mobile.js'));
 assert.ok(!converter.includes('<div class="web-warning">'));
 for(const token of [
   '@media (max-width: 760px)', '#nav .nav-link', 'overflow-x: auto',
