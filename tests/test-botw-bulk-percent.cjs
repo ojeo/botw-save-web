@@ -14,7 +14,7 @@ function make(tag){return{
   tagName:tag,id:'',textContent:'',value:'',children:[],events:{},style:{},
   appendChild(child){this.children.push(child);child.parentNode=this},
   insertBefore(child,next){const i=this.children.indexOf(next);this.children.splice(i<0?0:i,0,child);child.parentNode=this},
-  addEventListener(k,f){this.events[k]=f},
+  addEventListener(k,f){const old=this.events[k];this.events[k]=old?function(...args){old(...args);f(...args)}:f},
   setAttribute(k,v){this[k]=v},
   querySelector(k){return k==='input'?this.children.find(x=>x.tagName==='input'):null}
 };}
