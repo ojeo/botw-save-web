@@ -27,7 +27,7 @@
         result.skipped++;
         return;
       }
-      var target = BulkPercent.target(limit);
+      var target = window.BulkPercent.target(limit);
       if (item.quantity !== target) {
         item.quantity = target;
         // Update the model AND its visible input; do not only change the DOM.
@@ -53,7 +53,7 @@
         result.skipped++;
         return;
       }
-      var target = BulkPercent.target(maximum);
+      var target = window.BulkPercent.target(maximum);
       if (item.durability !== target) {
         item.durability = target;
         // Preserve modifier, modifierValue, fuse and extra durability.
@@ -66,7 +66,7 @@
   function apply(category) {
     var result = {
       category: category,
-      percent: BulkPercent.get(),
+      percent: window.BulkPercent.get(),
       changed: 0,
       skipped: 0,
       supported: canUse(category)
@@ -85,7 +85,7 @@
   function updateEnabled(button) {
     var category = UI.getCurrentTab();
     button.disabled = !canUse(category);
-    button.textContent = '当前分类数量/耐久最大化（' + BulkPercent.get() + '%）';
+    button.textContent = '当前分类数量/耐久最大化（' + window.BulkPercent.get() + '%）';
     button.title = canUse(category)
       ? '按照每件物品的独立最大值计算；装备只调整耐久，不更改原词条'
       : '当前分类没有可批量设置的数量或耐久字段';
@@ -99,7 +99,7 @@
     row.className = 'wrapper';
     row.style.cssText = 'padding:8px 12px 12px;display:flex;flex-wrap:wrap;' +
       'align-items:center;justify-content:flex-end;gap:10px;box-sizing:border-box;';
-    var setting = BulkPercent.createControl('totk-bulk-percent');
+    var setting = window.BulkPercent.createControl('totk-bulk-percent');
     var input = setting.querySelector('input');
     var btn = document.createElement('button');
     btn.id = 'totk-bulk-max';
@@ -119,7 +119,7 @@
         UI.toast('当前分类无可批量修改的数量/耐久字段', 'totk-bulk', 5000);
         return;
       }
-      var percent = BulkPercent.get();
+      var percent = window.BulkPercent.get();
       if (percent < 100 && !window.confirm(
         '将当前分类的数量/耐久设为各自最大值的 ' + percent +
         '%，可能降低已有数值。装备词条不会改变。确定继续？')) return;
