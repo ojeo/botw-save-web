@@ -67,6 +67,7 @@ function node(type) {
   }
 }
 const nav=node('nav'),top=node('row');
+nav.scrollLeft = 0; // Browser scroll containers always expose a numeric scrollLeft.
 const targets=['home','weapons','bows','shields','armors','materials','food','devices','key','horses','master'];
 const buttons=targets.map(target=>{const b=node('button');b.setAttribute('data-target',target);b.parent=nav;return b});
 nav.querySelectorAll=()=>buttons;
