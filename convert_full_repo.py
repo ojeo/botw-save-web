@@ -29,8 +29,12 @@ base = '<script type="text/javascript" src="js/savegame-editor.js"></script>'
 native = '<script type="text/javascript" src="js/native-app.js"></script>'
 if base not in html or native not in html:
     raise SystemExit("Upstream script layout changed; refusing to publish")
-html = html.replace(base, base + '\n<script src="js/web-download.js"></script>', 1)
-html = html.replace(native, '<script src="js/web-bridge.js"></script>', 1)
+html = html.replace(base,
+    base + '\n<script src="js/bulk-percent.js"></script>'
+         + '\n<script src="js/web-download.js"></script>', 1)
+html = html.replace(native,
+    '<script src="js/web-bridge.js"></script>'
+    + '\n<script src="js/web-bulk.js"></script>', 1)
 html = html.replace("</head>", """<style>
 #app-titlebar,.window-controls,.titlebar-drag,#show-save-folder,
 #backup-manager,#current-save-label {display:none!important}
@@ -58,6 +62,10 @@ htmlfile.write_text(html, encoding="utf-8")
 # The download adapter is maintained as a standalone, independently tested JS file.
 shutil.copy2(pathlib.Path(__file__).resolve().parent / "web" / "web-download.js",
              dst / "js" / "web-download.js")
+shutil.copy2(pathlib.Path(__file__).resolve().parent / "web" / "bulk-percent.js",
+             dst / "js" / "bulk-percent.js")
+shutil.copy2(pathlib.Path(__file__).resolve().parent / "web" / "botw-bulk.js",
+             dst / "js" / "web-bulk.js")
 (dst / "js" / "web-bridge.js").write_text("""
 (function(){
  'use strict';
@@ -93,18 +101,6 @@ shutil.copy2(pathlib.Path(__file__).resolve().parent / "web" / "web-download.js"
      change('max-hearts',120);change('max-stamina',1161527296);
      change('relic-gerudo',99);change('relic-goron',99);change('relic-rito',99);
      mark();
-   });
-   b=byId('bulk-fill-items');if(b)b.addEventListener('click',function(){
-     if(!loaded())return alert('请先载入存档');
-     var tab=window.currentTab;
-     if(['home','horses','master'].indexOf(tab)!==-1)return alert('请先选择物品分类');
-     var panel=byId('container-'+tab);if(!panel)return;
-     var count=0;
-     panel.querySelectorAll('input[id^="number-item"]').forEach(function(el){
-       var max=['weapons','bows','shields'].indexOf(tab)!==-1?99999:999;
-       if(Number.isFinite(el.maxValue))max=Math.min(max,el.maxValue);
-       el.value=String(max);el.dispatchEvent(new Event('change',{bubbles:true}));count++;
-     });mark('已修改 '+count+' 项，保存以下载');
    });
    b=byId('reset-amiibo-cooldown');if(b)b.addEventListener('click',function(){
      if(!loaded())return alert('请先载入存档');
@@ -156,6 +152,8 @@ shutil.copy2(pathlib.Path(__file__).resolve().parent / "web" / "totk-bridge.js",
              totk_target / "web-totk.js")
 shutil.copy2(pathlib.Path(__file__).resolve().parent / "web" / "totk-bulk.js",
              totk_target / "web-totk-bulk.js")
+shutil.copy2(pathlib.Path(__file__).resolve().parent / "web" / "bulk-percent.js",
+             totk_target / "web-bulk-percent.js")
 for save_file in totk_target.rglob("*.sav"):
     save_file.unlink()  # Do not publish example progress.sav, caption.sav, or user saves.
 totk_index = totk_target / "index.html"
@@ -172,6 +170,7 @@ totk_html = totk_html.replace(fflate_cdn,
     '<script src="./lib/fflate.min.js"></script>', 1)
 totk_html = totk_html.replace("</head>",
     '<script src="./web-totk.js"></script>\n'
+    '<script src="./web-bulk-percent.js"></script>\n'
     '<script src="./web-totk-bulk.js"></script>\n'
     '<style>.game-selector{display:flex;justify-content:center;gap:10px;'
     'background:#152943;padding:12px;flex-wrap:wrap}'
