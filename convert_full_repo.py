@@ -163,6 +163,12 @@ for save_file in totk_target.rglob("*.sav"):
     save_file.unlink()  # Do not publish example progress.sav, caption.sav, or user saves.
 totk_index = totk_target / "index.html"
 totk_html = totk_index.read_text(encoding="utf-8")
+# Respect user zoom / iOS safe areas instead of the upstream fixed-scale viewport.
+old_viewport = 'content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"'
+if old_viewport not in totk_html:
+    raise SystemExit("TOTK upstream viewport changed; update mobile compatibility check")
+totk_html = totk_html.replace(old_viewport,
+    'content="width=device-width, initial-scale=1, viewport-fit=cover"', 1)
 shared_script = '<script type="text/javascript" src="../savegame-editor.js?version=1"></script>'
 if shared_script not in totk_html:
     raise SystemExit("TOTK upstream shared script has changed")
