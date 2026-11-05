@@ -21,7 +21,7 @@ function make(tag){return{
 function inventoryInput(name,max,value){
  const x=make('input');
  x.id=name;x.maxValue=max;x.value=String(value);
- x.dispatchEvent(){changed.push({id:this.id,value:this.value})};
+ x.dispatchEvent=function(){changed.push({id:this.id,value:this.value})};
  return x;
 }
 const fields=[
