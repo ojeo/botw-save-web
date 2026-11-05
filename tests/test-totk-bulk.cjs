@@ -18,7 +18,7 @@ const pouches={
   bows:{items:[equipment('bow',6,50)]},
   shields:{items:[equipment('shield',10,25)]},
   arrows:{items:[{id:'arrow',quantity:4}]},
-  materials:{items:[{id:'zonaite',quantity:1},{id:'medallion',quantity:1},{id:'common',quantity:999}]},
+  materials:{items:[{id:'zonaite',quantity:1,_htmlRow:{}},{id:'medallion',quantity:1},{id:'common',quantity:999}]},
   food:{items:[{id:'stew',quantity:1}]},
   devices:{items:[{id:'device',quantity:1}]},
   key:{items:[{id:'key_flag',quantity:-1},{id:'key_counter',quantity:1}]},
